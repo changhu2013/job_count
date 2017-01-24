@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"os"
+
+	"flag"
 
 	"github.com/garyburd/redigo/redis"
 )
@@ -57,17 +58,18 @@ func jobCount(vvv bool, redisURLS []string) int64 {
 }
 
 func main() {
-	var args = os.Args[1:]
-	var vvv = len(args) > 0 && args[0] == "-v"
-	var dev = len(args) > 1 && args[1] == "-d"
-	var count int64
 
-	if dev {
-		var redisURLS = [...]string{"redis://192.168.200.50:6379"}
+	var v bool
+	var t bool
 
-		count = jobCount(vvv, redisURLS[0:])
-	} else {
-		var redisURLS = [...]string{
+	flag.BoolVar(&v, "v", false, "显示详细信息")
+	flag.BoolVar(&t, "t", false, "测试环境")
+	flag.Parse()
+
+	var redisURLS = []string{"redis://192.168.200.50:6379"}
+
+	if !t {
+		redisURLS = []string{
 			"redis://192.168.1.152:6379",
 			"redis://192.168.1.152:6380",
 			"redis://192.168.1.152:6381",
@@ -75,9 +77,9 @@ func main() {
 			"redis://192.168.1.153:6380",
 			"redis://192.168.1.153:6381",
 		}
-
-		count = jobCount(vvv, redisURLS[0:])
 	}
+
+	var count = jobCount(v, redisURLS)
 
 	fmt.Println(count)
 }
